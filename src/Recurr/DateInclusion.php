@@ -22,10 +22,10 @@ namespace Recurr;
  */
 class DateInclusion
 {
-    /** @var \DateTime */
+    /** @var \DateTimeInterface */
     public $date;
 
-    /** @var bool Day of year */
+    /** @var bool */
     public $hasTime;
 
     /** @var bool */
@@ -34,11 +34,11 @@ class DateInclusion
     /**
      * Constructor
      *
-     * @param \DateTime $date
-     * @param bool      $hasTime
-     * @param bool      $isUtcExplicit
+     * @param \DateTimeInterface $date
+     * @param bool               $hasTime
+     * @param bool               $isUtcExplicit
      */
-    public function __construct(\DateTime $date, $hasTime = true, $isUtcExplicit = false)
+    public function __construct(\DateTimeInterface $date, $hasTime = true, $isUtcExplicit = false)
     {
         $this->date          = $date;
         $this->hasTime       = $hasTime;

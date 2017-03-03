@@ -22,7 +22,7 @@ namespace Recurr;
  */
 class DateInfo
 {
-    /** @var \DateTime */
+    /** @var \DateTimeInterface */
     public $dt;
 
     /**

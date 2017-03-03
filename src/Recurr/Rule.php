@@ -20,7 +20,6 @@ namespace Recurr;
 use Recurr\Exception\InvalidArgument;
 use Recurr\Exception\InvalidRRule;
 use Recurr\Exception\InvalidWeekday;
-use Recurr\Weekday;
 
 /**
  * This class is responsible for providing a programmatic way of building,
@@ -104,10 +103,10 @@ class Rule
     /** @var string */
     protected $timezone;
 
-    /** @var \DateTime|null */
+    /** @var \DateTimeInterface|null */
     protected $startDate;
 
-    /** @var \DateTime|null */
+    /** @var \DateTimeInterface|null */
     protected $endDate;
 
     /** @var bool */
@@ -122,7 +121,7 @@ class Rule
     /** @var bool */
     protected $isExplicitInterval = false;
 
-    /** @var \DateTime|null */
+    /** @var \DateTimeInterface|null */
     protected $until;
 
     /** @var int|null */
@@ -179,15 +178,17 @@ class Rule
     /**
      * Construct a new Rule.
      *
-     * @param string           $rrule RRULE string
-     * @param string|\DateTime $startDate
-     * @param \DateTime|null   $endDate
-     * @param string           $timezone
+     * @param string|array              $rrule RRULE string
+     * @param string|\DateTimeInterface $startDate
+     * @param \DateTimeInterface|null   $endDate
+     * @param string                    $timezone
+     *
+     * @throws InvalidRRule
      */
     public function __construct($rrule = null, $startDate = null, $endDate = null, $timezone = null)
     {
         if (empty($timezone)) {
-            if ($startDate instanceof \DateTime) {
+            if ($startDate instanceof \DateTimeInterface) {
                 $timezone = $startDate->getTimezone()->getName();
             } else {
                 $timezone = date_default_timezone_get();
@@ -195,7 +196,7 @@ class Rule
         }
         $this->setTimezone($timezone);
 
-        if (!$startDate instanceof \DateTime) {
+        if (!$startDate instanceof \DateTimeInterface) {
             $startDate  = new \DateTime($startDate, new \DateTimeZone($timezone));
         }
 
@@ -212,10 +213,10 @@ class Rule
     /**
      * Create a Rule object based on a RRULE string.
      *
-     * @param string           $rrule RRULE string
-     * @param string|\DateTime $startDate
-     * @param \DateTime|null   $endDate
-     * @param string           $timezone
+     * @param string                    $rrule RRULE string
+     * @param string|\DateTimeInterface $startDate
+     * @param \DateTimeInterface|null   $endDate
+     * @param string                    $timezone
      *
      * @return Rule
      * @throws InvalidRRule
@@ -230,10 +231,10 @@ class Rule
     /**
      * Create a Rule object based on a RRULE array.
      *
-     * @param array           $rrule RRULE array
-     * @param string|\DateTime $startDate
-     * @param \DateTime|null   $endDate
-     * @param string           $timezone
+     * @param array                     $rrule RRULE array
+     * @param string|\DateTimeInterface $startDate
+     * @param \DateTimeInterface|null   $endDate
+     * @param string                    $timezone
      *
      * @return Rule
      * @throws InvalidRRule
@@ -284,6 +285,7 @@ class Rule
      *
      * @return Rule
      * @throws InvalidRRule
+     * @throws InvalidArgument
      */
     public function loadFromArray($parts)
     {
@@ -395,6 +397,7 @@ class Rule
     /**
      * Get the RRULE as a string
      *
+     * @param string $timezoneType
      * @return string
      */
     public function getString($timezoneType=self::TZ_FLOAT)
@@ -573,8 +576,8 @@ class Rule
     /**
      * This date specifies the first instance in the recurrence set.
      *
-     * @param \DateTime|null $startDate       Date of the first instance in the recurrence
-     * @param bool|null      $includeInString If true, include as DTSTART when calling getString()
+     * @param \DateTimeInterface|null $startDate       Date of the first instance in the recurrence
+     * @param bool|null               $includeInString If true, include as DTSTART when calling getString()
      *
      * @return $this
      */
@@ -590,7 +593,7 @@ class Rule
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getStartDate()
     {
@@ -600,7 +603,7 @@ class Rule
     /**
      * This date specifies the last possible instance in the recurrence set.
      *
-     * @param \DateTime|null $endDate Date of the last possible instance in the recurrence
+     * @param \DateTimeInterface|null $endDate Date of the last possible instance in the recurrence
      *
      * @return $this
      */
@@ -612,7 +615,7 @@ class Rule
     }
 
     /**
-     * @return \DateTime|null
+     * @return \DateTimeInterface|null
      */
     public function getEndDate()
     {
@@ -638,7 +641,7 @@ class Rule
      *  - Frequency::YEAR to specify repeating events based on an
      *    interval of a year or more.
      *
-     * @param string $freq Frequency of recurrence.
+     * @param string|int $freq Frequency of recurrence.
      *
      * @return $this
      * @throws Exception\InvalidArgument
@@ -730,11 +733,11 @@ class Rule
      * Either UNTIL or COUNT may be specified, but UNTIL and COUNT MUST NOT
      * both be specified.
      *
-     * @param \DateTime $until The upper bound of the recurrence.
+     * @param \DateTimeInterface $until The upper bound of the recurrence.
      *
      * @return $this
      */
-    public function setUntil(\DateTime $until)
+    public function setUntil(\DateTimeInterface $until)
     {
         $this->until = $until;
         $this->count = null;
@@ -743,15 +746,15 @@ class Rule
     }
 
     /**
-     * Get the \DateTime that the recurrence lasts until.
+     * Get the \DateTimeInterface that the recurrence lasts until.
      *
-     * @return \DateTime|null
+     * @return \DateTimeInterface|null
      */
     public function getUntil()
     {
         $date = $this->until;
 
-        if ($date instanceof \DateTime
+        if ($date instanceof \DateTimeInterface
             && $date->getTimezone()->getName() == 'UTC'
             && $this->getTimezone() != 'UTC'
         ) {
@@ -1173,7 +1176,7 @@ class Rule
             if ($val instanceof DateInclusion) {
                 $val->date = $this->convertZtoUtc($val->date);
             } else {
-                $date          = new \DateTime($val, $timezone);
+                $date         = new \DateTime($val, $timezone);
                 $rDates[$key] = new DateInclusion(
                     $this->convertZtoUtc($date),
                     strpos($val, 'T') !== false,
@@ -1230,11 +1233,11 @@ class Rule
      *
      * This is necessary for exclusion dates to be handled properly.
      *
-     * @param \DateTime $date
+     * @param \DateTimeInterface $date
      *
      * @return \DateTime
      */
-    private function convertZtoUtc(\DateTime $date)
+    private function convertZtoUtc(\DateTimeInterface $date)
     {
         if ($date->getTimezone()->getName() !== 'Z') {
             return $date;
