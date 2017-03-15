@@ -19,6 +19,12 @@
 	"require-dev": {
 		"phpunit/phpunit": "~4.5"
 	},
+	"repositories": [
+		{
+			"url": "https://github.com/wheniwork/recurr.git",
+			"type": "git"
+		}
+	],
 	"autoload": {
 		"psr-0": {
 			"Recurr": "src/"
