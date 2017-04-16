@@ -217,7 +217,7 @@ class DateUtil
         $dayOfYear = $dt->format('z');
 
         if (self::isLeapYearDate($dt) && self::hasLeapYearBug() && $dt->format('nj') > 229) {
-            $dayOfYear -= 1;
+            --$dayOfYear;
         }
 
         $start = $dayOfYear;
@@ -266,8 +266,6 @@ class DateUtil
      */
     public static function getTimeSetOfMinute(Rule $rule, \DateTime $dt)
     {
-        $set = array();
-
         $hour     = $dt->format('G');
         $minute   = $dt->format('i');
         $bySecond = $rule->getBySecond();
@@ -276,11 +274,9 @@ class DateUtil
             $bySecond = array($dt->format('s'));
         }
 
-        foreach ($bySecond as $second) {
-            $set[] = new Time($hour, $minute, $second);
-        }
-
-        return $set;
+        return array_map(function ($second) use ($hour, $minute) {
+            return new Time($hour, $minute, $second);
+        }, $bySecond);
     }
 
     /**
@@ -473,7 +469,7 @@ class DateUtil
      */
     public static function isLeapYearDate(\DateTime $dt)
     {
-        return $dt->format('L') ? true : false;
+        return (bool) $dt->format('L');
     }
 
     /**
