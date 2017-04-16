@@ -283,9 +283,9 @@ class DateUtil
     }
 
     /**
-     * @param \DateTime      $dt
+     * @param \DateTime $dt
      *
-     * @return array
+     * @return Time[]
      */
     public static function getTimeSetOfSecond(\DateTime $dt)
     {
@@ -296,7 +296,7 @@ class DateUtil
      * @param Rule      $rule
      * @param \DateTime $dt
      *
-     * @return array
+     * @return Time[]
      */
     public static function getTimeSet(Rule $rule, \DateTime $dt)
     {

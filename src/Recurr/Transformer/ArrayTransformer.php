@@ -327,7 +327,6 @@ class ArrayTransformer
                         $nextInSet = $tmp[$dayPos];
                     }
 
-                    /** @var Time $time */
                     $time = $timeSet[$timePos];
 
                     $dtTmp = DateUtil::getDateTimeByDayOfYear($nextInSet, $dt->format('Y'), $start->getTimezone());
@@ -383,7 +382,6 @@ class ArrayTransformer
                     $dtTmp = DateUtil::getDateTimeByDayOfYear($dayOfYear, $dt->format('Y'), $start->getTimezone());
 
                     foreach ($timeSet as $time) {
-                        /** @var Time $time */
                         $dtTmp->setTime(
                             $time->hour,
                             $time->minute,
@@ -681,10 +679,10 @@ class ArrayTransformer
     /**
      * @param Weekday[]|null $byWeekDayRel
      * @param int $freq
-     * @param $byMonth
-     * @param $dtInfo
-     * @param $month
-     * @param $wDayMaskRel
+     * @param int[] $byMonth
+     * @param DateInfo $dtInfo
+     * @param string|int $month
+     * @param int[] $wDayMaskRel
      *
      * @return array
      */
