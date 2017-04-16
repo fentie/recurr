@@ -29,16 +29,18 @@ use Recurr\Rule;
  */
 class DateUtil
 {
+    const DAYS_IN_YEAR = 365;
+    const DAYS_IN_LEAP_YEAR = 366;
+
     public static $leapBug = null;
 
     public static $monthEndDoY366 = array(
-        0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366
+        0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, self::DAYS_IN_LEAP_YEAR
     );
 
     public static $monthEndDoY365 = array(
-        0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+        0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, self::DAYS_IN_YEAR
     );
-
     public static $wDayMask = array(
         0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6,
         0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6, 0, 1, 2, 3, 4, 5, 6,
@@ -80,7 +82,7 @@ class DateUtil
         $i->mDayMask    = self::getMonthDaysMask($dt);
         $i->mDayMaskNeg = self::getMonthDaysMask($dt, true);
 
-        if ($i->yearLength == 365) {
+        if ($i->yearLength === self::DAYS_IN_YEAR) {
             $i->mRanges = self::$monthEndDoY365;
         } else {
             $i->mRanges = self::$monthEndDoY366;
@@ -556,6 +558,6 @@ class DateUtil
      */
     public static function getYearLength(\DateTime $dt)
     {
-        return self::isLeapYearDate($dt) ? 366 : 365;
+        return self::isLeapYearDate($dt) ? self::DAYS_IN_LEAP_YEAR : self::DAYS_IN_YEAR;
     }
 }
