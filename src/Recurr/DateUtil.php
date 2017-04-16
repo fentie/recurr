@@ -133,9 +133,7 @@ class DateUtil
             }
         }
 
-        $obj = new DaySet($set, $start, $i);
-
-        return $obj;
+        return new DaySet($set, $start, $i);
     }
 
     /**
@@ -202,9 +200,8 @@ class DateUtil
         $days = range(0, $dt->format('t') - 1);
         $set  = range($start, $end - 1);
         $set  = array_combine($days, $set);
-        $obj  = new DaySet($set, $start, $end - 1);
 
-        return $obj;
+        return new DaySet($set, $start, $end - 1);
     }
 
     /**
@@ -226,9 +223,8 @@ class DateUtil
         $end   = $dayOfYear;
 
         $set = range($start, $end);
-        $obj = new DaySet($set, $start, $end + 1);
 
-        return $obj;
+        return new DaySet($set, $start, $end + 1);
     }
 
     /**
