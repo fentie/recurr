@@ -236,9 +236,6 @@ class DateUtil
      */
     public static function getTimeSetOfHour(Rule $rule, \DateTime $dt)
     {
-        $set = array();
-
-        $hour     = $dt->format('G');
         $byMinute = $rule->getByMinute();
         $bySecond = $rule->getBySecond();
 
@@ -250,6 +247,8 @@ class DateUtil
             $bySecond = array($dt->format('s'));
         }
 
+        $hour = $dt->format('G');
+        $set = array();
         foreach ($byMinute as $minute) {
             foreach ($bySecond as $second) {
                 $set[] = new Time($hour, $minute, $second);
@@ -302,10 +301,8 @@ class DateUtil
      */
     public static function getTimeSet(Rule $rule, \DateTime $dt)
     {
-        $set = array();
-
         if (null === $rule || $rule->getFreq() >= Frequency::HOURLY) {
-            return $set;
+            return array();
         }
 
         $byHour   = $rule->getByHour();
@@ -324,6 +321,7 @@ class DateUtil
             $bySecond = array($dt->format('s'));
         }
 
+        $set = array();
         foreach ($byHour as $hour) {
             foreach ($byMinute as $minute) {
                 foreach ($bySecond as $second) {
