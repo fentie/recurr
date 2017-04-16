@@ -16,6 +16,7 @@ namespace Recurr\Transformer;
 
 use Recurr\DateExclusion;
 use Recurr\DateInclusion;
+use Recurr\DateInfo;
 use Recurr\Exception\InvalidWeekday;
 use Recurr\Frequency;
 use Recurr\Recurrence;
@@ -218,117 +219,11 @@ class ArrayTransformer
             $daySet      = $tmp->set;
             $daySetStart = $tmp->start;
             $daySetEnd   = $tmp->end;
-            $wNoMask     = array();
             $wDayMaskRel = array();
             $timeSet = $this->buildTimeSet($rule, $freq, $byHour, $hour, $byMinute, $minute, $bySecond, $second, $dt);
 
             // Handle byWeekNum
-            if (!empty($byWeekNum)) {
-                $no1WeekStart = $firstWeekStart = DateUtil::pymod(7 - $dtInfo->dayOfWeekYearDay1 + $weekStart, 7);
-
-                if ($no1WeekStart >= 4) {
-                    $no1WeekStart = 0;
-
-                    $wYearLength = $dtInfo->yearLength + DateUtil::pymod(
-                            $dtInfo->dayOfWeekYearDay1 - $weekStart,
-                            7
-                        );
-                } else {
-                    $wYearLength = $dtInfo->yearLength - $no1WeekStart;
-                }
-
-                $div      = floor($wYearLength / 7);
-                $mod      = DateUtil::pymod($wYearLength, 7);
-                $numWeeks = floor($div + ($mod / 4));
-
-                foreach ($byWeekNum as $weekNum) {
-                    if ($weekNum < 0) {
-                        $weekNum += $numWeeks + 1;
-                    }
-
-                    if (!(0 < $weekNum && $weekNum <= $numWeeks)) {
-                        continue;
-                    }
-
-                    if ($weekNum > 1) {
-                        $offset = $no1WeekStart + ($weekNum - 1) * 7;
-                        if ($no1WeekStart != $firstWeekStart) {
-                            $offset -= 7 - $firstWeekStart;
-                        }
-                    } else {
-                        $offset = $no1WeekStart;
-                    }
-
-                    for ($i = 0; $i < 7; $i++) {
-                        $wNoMask[] = $offset;
-                        $offset++;
-                        if ($dtInfo->wDayMask[$offset] == $weekStart) {
-                            break;
-                        }
-                    }
-                }
-
-                // Check week number 1 of next year as well
-                if (in_array(1, $byWeekNum)) {
-                    $offset = $no1WeekStart + $numWeeks * 7;
-
-                    if ($no1WeekStart != $firstWeekStart) {
-                        $offset -= 7 - $firstWeekStart;
-                    }
-
-                    // If week starts in next year, we don't care about it.
-                    if ($offset < $dtInfo->yearLength) {
-                        for ($k = 0; $k < 7; $k++) {
-                            $wNoMask[] = $offset;
-                            $offset += 1;
-                            if ($dtInfo->wDayMask[$offset] == $weekStart) {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if ($no1WeekStart) {
-                    // Check last week number of last year as well.
-                    // If $no1WeekStart is 0, either the year started on week start,
-                    // or week number 1 got days from last year, so there are no
-                    // days from last year's last week number in this year.
-                    if (!in_array(-1, $byWeekNum)) {
-                        $dtTmp = new \DateTime();
-                        $dtTmp->setDate($year - 1, 1, 1);
-                        $lastYearWeekDay      = DateUtil::getDayOfWeek($dtTmp);
-                        $lastYearNo1WeekStart = DateUtil::pymod(7 - $lastYearWeekDay + $weekStart, 7);
-                        $lastYearLength       = DateUtil::getYearLength($dtTmp);
-                        if ($lastYearNo1WeekStart >= 4) {
-                            $lastYearNo1WeekStart = 0;
-                            $lastYearNumWeeks     = floor(
-                                52 + DateUtil::pymod(
-                                    $lastYearLength + DateUtil::pymod(
-                                        $lastYearWeekDay - $weekStart,
-                                        7
-                                    ),
-                                    7
-                                ) / 4
-                            );
-                        } else {
-                            $lastYearNumWeeks = floor(
-                                52 + DateUtil::pymod(
-                                    $dtInfo->yearLength - $no1WeekStart,
-                                    7
-                                ) / 4
-                            );
-                        }
-                    } else {
-                        $lastYearNumWeeks = -1;
-                    }
-
-                    if (in_array($lastYearNumWeeks, $byWeekNum)) {
-                        for ($i = 0; $i < $no1WeekStart; $i++) {
-                            $wNoMask[] = $i;
-                        }
-                    }
-                }
-            }
+            $wNoMask = $this->calculateWeekNumberMask($byWeekNum, $dtInfo, $weekStart, $year);
 
             // Handle relative weekdays (e.g. 3rd Friday of month)
             if (!empty($byWeekDayRel)) {
@@ -715,8 +610,122 @@ class ArrayTransformer
     }
 
     /**
+     * @param int[] $byWeekNum
+     * @param DateInfo $dtInfo
+     * @param int $weekStart
+     * @param string $year
+     *
+     * @return array
+     */
+    private function calculateWeekNumberMask($byWeekNum, $dtInfo, $weekStart, $year)
+    {
+        if (empty($byWeekNum)) {
+            return [];
+        }
+
+        $no1WeekStart = $firstWeekStart = DateUtil::pymod(7 - $dtInfo->dayOfWeekYearDay1 + $weekStart, 7);
+
+        if ($no1WeekStart >= 4) {
+            $no1WeekStart = 0;
+
+            $wYearLength = $dtInfo->yearLength + DateUtil::pymod($dtInfo->dayOfWeekYearDay1 - $weekStart, 7);
+        } else {
+            $wYearLength = $dtInfo->yearLength - $no1WeekStart;
+        }
+
+        $div = floor($wYearLength / 7);
+        $mod = DateUtil::pymod($wYearLength, 7);
+        $numWeeks = floor($div + ($mod / 4));
+
+        $wNoMask = [];
+        foreach ($byWeekNum as $weekNum) {
+            if ($weekNum < 0) {
+                $weekNum += $numWeeks + 1;
+            }
+
+            if (!(0 < $weekNum && $weekNum <= $numWeeks)) {
+                continue;
+            }
+
+            if ($weekNum > 1) {
+                $offset = $no1WeekStart + ($weekNum - 1) * 7;
+                if ($no1WeekStart != $firstWeekStart) {
+                    $offset -= 7 - $firstWeekStart;
+                }
+            } else {
+                $offset = $no1WeekStart;
+            }
+
+            for ($i = 0; $i < 7; $i++) {
+                $wNoMask[] = $offset;
+                $offset++;
+                if ($dtInfo->wDayMask[$offset] == $weekStart) {
+                    break;
+                }
+            }
+        }
+
+        // Check week number 1 of next year as well
+        if (in_array(1, $byWeekNum)) {
+            $offset = $no1WeekStart + $numWeeks * 7;
+
+            if ($no1WeekStart != $firstWeekStart) {
+                $offset -= 7 - $firstWeekStart;
+            }
+
+            // If week starts in next year, we don't care about it.
+            if ($offset < $dtInfo->yearLength) {
+                for ($k = 0; $k < 7; $k++) {
+                    $wNoMask[] = $offset;
+                    ++$offset;
+                    if ($dtInfo->wDayMask[$offset] == $weekStart) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($no1WeekStart) {
+            // Check last week number of last year as well.
+            // If $no1WeekStart is 0, either the year started on week start,
+            // or week number 1 got days from last year, so there are no
+            // days from last year's last week number in this year.
+            if (!in_array(-1, $byWeekNum)) {
+                $dtTmp = new \DateTime();
+                $dtTmp->setDate($year - 1, 1, 1);
+                $lastYearWeekDay = DateUtil::getDayOfWeek($dtTmp);
+                $lastYearNo1WeekStart = DateUtil::pymod(7 - $lastYearWeekDay + $weekStart, 7);
+                $lastYearLength = DateUtil::getYearLength($dtTmp);
+                if ($lastYearNo1WeekStart >= 4) {
+                    $lastYearNumWeeks = floor(
+                        52 + DateUtil::pymod(
+                            $lastYearLength + DateUtil::pymod(
+                                $lastYearWeekDay - $weekStart,
+                                7
+                            ),
+                            7
+                        ) / 4
+                    );
+                } else {
+                    $lastYearNumWeeks = floor(52 + DateUtil::pymod($dtInfo->yearLength - $no1WeekStart, 7) / 4);
+                }
+            } else {
+                $lastYearNumWeeks = -1;
+            }
+
+            if (in_array($lastYearNumWeeks, $byWeekNum)) {
+                for ($i = 0; $i < $no1WeekStart; $i++) {
+                    $wNoMask[] = $i;
+                }
+            }
+        }
+
+        return $wNoMask;
+    }
+
+    /**
      * @param Rule $rule
-     * @param $freq
+     * @param int $freq
      * @param int[] $byHour
      * @param int $hour
      * @param int[] $byMinute
