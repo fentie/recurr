@@ -242,18 +242,7 @@ class ArrayTransformer
                         $wNoMask
                     );
 
-                $ifByYearDay = $byYearDay !== null && (
-                        (
-                            $i < $dtInfo->yearLength &&
-                            !in_array($i + 1, $byYearDay) &&
-                            !in_array(-$dtInfo->yearLength + $i, $byYearDay)
-                        ) ||
-                        (
-                            $i >= $dtInfo->yearLength &&
-                            !in_array($i + 1 - $dtInfo->yearLength, $byYearDay) &&
-                            !in_array(-$dtInfo->nextYearLength + $i - $dtInfo->yearLength, $byYearDay)
-                        )
-                    );
+                $ifByYearDay = $this->byYearDayRuleApplies($byYearDay, $dayOfYear, $dtInfo);
 
                 $ifByMonthDay = $byMonthDay !== null && !in_array(
                         $dtInfo->mDayMask[$dayOfYear],
@@ -762,5 +751,29 @@ class ArrayTransformer
         }
 
         return DateUtil::getTimeSet($rule, $dt);
+    }
+
+    /**
+     * @param int[]|null $byYearDay
+     * @param int $dayOfYear
+     * @param DateInfo $dtInfo
+     *
+     * @return bool
+     */
+    private function byYearDayRuleApplies($byYearDay, $dayOfYear, $dtInfo)
+    {
+        if ($byYearDay === null) {
+            return false;
+        }
+        return (
+                $dayOfYear < $dtInfo->yearLength &&
+                !in_array($dayOfYear + 1, $byYearDay) &&
+                !in_array(-$dtInfo->yearLength + $dayOfYear, $byYearDay)
+            ) ||
+            (
+                $dayOfYear >= $dtInfo->yearLength &&
+                !in_array($dayOfYear + 1 - $dtInfo->yearLength, $byYearDay) &&
+                !in_array(-$dtInfo->nextYearLength + $dayOfYear - $dtInfo->yearLength, $byYearDay)
+            );
     }
 }
