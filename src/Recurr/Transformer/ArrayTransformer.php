@@ -113,9 +113,6 @@ class ArrayTransformer
 
         $freq          = $rule->getFreq();
         $weekStart     = $rule->getWeekStartAsNum();
-        $bySecond      = $rule->getBySecond();
-        $byMinute      = $rule->getByMinute();
-        $byHour        = $rule->getByHour();
         $byMonth       = $rule->getByMonth();
         $byWeekNum     = $rule->getByWeekNumber();
         $byYearDay     = $rule->getByYearDay();
@@ -220,7 +217,7 @@ class ArrayTransformer
             $daySetStart = $tmp->start;
             $daySetEnd   = $tmp->end;
             $wDayMaskRel = array();
-            $timeSet = $this->buildTimeSet($rule, $freq, $byHour, $hour, $byMinute, $minute, $bySecond, $second, $dt);
+            $timeSet = $this->buildTimeSet($rule, $freq, $hour, $minute, $second, $dt);
 
             // Handle relative weekdays (e.g. 3rd Friday of month)
             list($byWeekDayRel, $wDayMaskRel) = $this->handleRelativeWeekdays(
@@ -685,19 +682,19 @@ class ArrayTransformer
     /**
      * @param Rule $rule
      * @param int $freq
-     * @param int[] $byHour
-     * @param int $hour
-     * @param int[] $byMinute
-     * @param int $minute
-     * @param int[] $bySecond
-     * @param int $second
+     * @param int|string $hour
+     * @param int|string $minute
+     * @param int|string $second
      * @param \DateTime $dt
      *
      * @return Time[]
      */
-    private function buildTimeSet(Rule $rule, $freq, $byHour, $hour, $byMinute, $minute, $bySecond, $second, \DateTime $dt)
+    private function buildTimeSet(Rule $rule, $freq, $hour, $minute, $second, \DateTime $dt)
     {
         if ($freq >= Frequency::HOURLY) {
+            $bySecond = $rule->getBySecond();
+            $byMinute = $rule->getByMinute();
+            $byHour   = $rule->getByHour();
             if (($freq >= Frequency::HOURLY && !empty($byHour) && !in_array($hour, $byHour, true)) ||
                 ($freq >= Frequency::MINUTELY && !empty($byMinute) && !in_array($minute, $byMinute, true)) ||
                 ($freq >= Frequency::SECONDLY && !empty($bySecond) && !in_array($second, $bySecond, true))
