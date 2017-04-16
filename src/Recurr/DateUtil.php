@@ -89,7 +89,7 @@ class DateUtil
         }
 
         $tmpDt = clone $dt;
-        $tmpDt->setDate($dt->format('Y') + 1, 1, 1);
+        $tmpDt->setDate((int) $dt->format('Y') + 1, 1, 1);
         $i->nextYearLength = self::getYearLength($tmpDt);
 
         $tmpDt = clone $dt;
@@ -214,7 +214,7 @@ class DateUtil
      */
     public static function getDaySetOfDay(\DateTime $dt)
     {
-        $dayOfYear = $dt->format('z');
+        $dayOfYear = (int) $dt->format('z');
 
         if (self::isLeapYearDate($dt) && self::hasLeapYearBug() && $dt->format('nj') > 229) {
             --$dayOfYear;

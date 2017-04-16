@@ -521,12 +521,12 @@ class ArrayTransformer
                     $recurrenceDate->setTimezone($exclusionTimezone);
                 }
 
-                if (!$exclusion->hasTime && $recurrenceDate->format('Ymd') == $exclusionDate) {
+                if (!$exclusion->hasTime && $recurrenceDate->format('Ymd') === $exclusionDate) {
                     unset($recurrences[$key]);
                     continue;
                 }
 
-                if ($exclusion->hasTime && $recurrenceDate->format('Ymd\THis') == $exclusionTime) {
+                if ($exclusion->hasTime && $recurrenceDate->format('Ymd\THis') === $exclusionTime) {
                     unset($recurrences[$key]);
                 }
             }
