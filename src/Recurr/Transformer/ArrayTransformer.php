@@ -355,9 +355,9 @@ class ArrayTransformer
                             if ($constraint->stopsTransformer()) {
                                 $continue = false;
                                 break;
-                            } else {
-                                continue;
                             }
+
+                            continue;
                         }
                     } else {
                         $dates[$total] = $dtTmp;

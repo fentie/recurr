@@ -375,15 +375,15 @@ class DateUtil
 
         if (self::isLeapYearDate($dt)) {
             return $mask;
-        } else {
-            if ($negative) {
-                $mask = array_merge(array_slice($mask, 0, 31), array_slice($mask, 32));
-            } else {
-                $mask = array_merge(array_slice($mask, 0, 59), array_slice($mask, 60));
-            }
-
-            return $mask;
         }
+
+        if ($negative) {
+            $mask = array_merge(array_slice($mask, 0, 31), array_slice($mask, 32));
+        } else {
+            $mask = array_merge(array_slice($mask, 0, 59), array_slice($mask, 60));
+        }
+
+        return $mask;
     }
 
     public static function getMonthMask(\DateTime $dt)
@@ -404,23 +404,23 @@ class DateUtil
                 array_fill(0, 31, 12), // Dec (31)
                 array_fill(0, 7, 1)
             );
-        } else {
-            return array_merge(
-                array_fill(0, 31, 1), // Jan (31)
-                array_fill(0, 28, 2), // Feb (28)
-                array_fill(0, 31, 3), // Mar (31)
-                array_fill(0, 30, 4), // Apr (30)
-                array_fill(0, 31, 5), // May (31)
-                array_fill(0, 30, 6), // Jun (30)
-                array_fill(0, 31, 7), // Jul (31)
-                array_fill(0, 31, 8), // Aug (31)
-                array_fill(0, 30, 9), // Sep (30)
-                array_fill(0, 31, 10), // Oct (31)
-                array_fill(0, 30, 11), // Nov (30)
-                array_fill(0, 31, 12), // Dec (31)
-                array_fill(0, 7, 1)
-            );
         }
+
+        return array_merge(
+            array_fill(0, 31, 1), // Jan (31)
+            array_fill(0, 28, 2), // Feb (28)
+            array_fill(0, 31, 3), // Mar (31)
+            array_fill(0, 30, 4), // Apr (30)
+            array_fill(0, 31, 5), // May (31)
+            array_fill(0, 30, 6), // Jun (30)
+            array_fill(0, 31, 7), // Jul (31)
+            array_fill(0, 31, 8), // Aug (31)
+            array_fill(0, 30, 9), // Sep (30)
+            array_fill(0, 31, 10), // Oct (31)
+            array_fill(0, 30, 11), // Nov (30)
+            array_fill(0, 31, 12), // Dec (31)
+            array_fill(0, 7, 1)
+        );
     }
 
     public static function getDateTimeByDayOfYear($dayOfYear, $year, \DateTimeZone $timezone)
