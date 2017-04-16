@@ -226,52 +226,7 @@ class ArrayTransformer
             $wNoMask = $this->calculateWeekNumberMask($byWeekNum, $dtInfo, $weekStart, $year);
 
             // Handle relative weekdays (e.g. 3rd Friday of month)
-            if (!empty($byWeekDayRel)) {
-                $ranges = array();
-
-                if (Frequency::YEARLY == $freq) {
-                    if (!empty($byMonth)) {
-                        foreach ($byMonth as $mo) {
-                            $ranges[] = array_slice($dtInfo->mRanges, $mo - 1, 2);
-                        }
-                    } else {
-                        $ranges[] = array(0, $dtInfo->yearLength);
-                    }
-                } elseif (Frequency::MONTHLY == $freq) {
-                    $ranges[] = array_slice($dtInfo->mRanges, $month - 1, 2);
-                }
-
-                if (!empty($ranges)) {
-                    foreach ($ranges as $range) {
-                        $rangeStart = $range[0];
-                        $rangeEnd   = $range[1];
-                        --$rangeEnd;
-
-                        reset($byWeekDayRel);
-                        foreach ($byWeekDayRel as $weekday) {
-                            /** @var Weekday $weekday */
-
-                            if ($weekday->num < 0) {
-                                $i = $rangeEnd + ($weekday->num + 1) * 7;
-                                $i -= DateUtil::pymod(
-                                    $dtInfo->wDayMask[$i] - $weekday->weekday,
-                                    7
-                                );
-                            } else {
-                                $i = $rangeStart + ($weekday->num - 1) * 7;
-                                $i += DateUtil::pymod(
-                                    7 - $dtInfo->wDayMask[$i] + $weekday->weekday,
-                                    7
-                                );
-                            }
-
-                            if ($rangeStart <= $i && $i <= $rangeEnd) {
-                                $wDayMaskRel[] = $i;
-                            }
-                        }
-                    }
-                }
-            }
+            list($byWeekDayRel, $wDayMaskRel) = $this->handleRelativeWeekdays($byWeekDayRel, $freq, $byMonth, $dtInfo, $month, $wDayMaskRel);
 
             $numMatched = 0;
             foreach ($daySet as $i => $dayOfYear) {
@@ -721,6 +676,58 @@ class ArrayTransformer
         }
 
         return $wNoMask;
+    }
+
+    /**
+     * @param Weekday[]|null $byWeekDayRel
+     * @param int $freq
+     * @param $byMonth
+     * @param $dtInfo
+     * @param $month
+     * @param $wDayMaskRel
+     *
+     * @return array
+     */
+    private function handleRelativeWeekdays($byWeekDayRel, $freq, $byMonth, $dtInfo, $month, $wDayMaskRel)
+    {
+        if (!empty($byWeekDayRel)) {
+            $ranges = array();
+
+            if (Frequency::YEARLY === $freq) {
+                if (!empty($byMonth)) {
+                    foreach ($byMonth as $mo) {
+                        $ranges[] = array_slice($dtInfo->mRanges, $mo - 1, 2);
+                    }
+                } else {
+                    $ranges[] = array(0, $dtInfo->yearLength);
+                }
+            } elseif (Frequency::MONTHLY === $freq) {
+                $ranges[] = array_slice($dtInfo->mRanges, $month - 1, 2);
+            }
+
+            foreach ($ranges as list($rangeStart, $rangeEnd)) {
+                --$rangeEnd;
+
+                reset($byWeekDayRel);
+                foreach ($byWeekDayRel as $weekday) {
+                    /** @var Weekday $weekday */
+
+                    if ($weekday->num < 0) {
+                        $i = $rangeEnd + ($weekday->num + 1) * 7;
+                        $i -= DateUtil::pymod($dtInfo->wDayMask[$i] - $weekday->weekday, 7);
+                    } else {
+                        $i = $rangeStart + ($weekday->num - 1) * 7;
+                        $i += DateUtil::pymod(7 - $dtInfo->wDayMask[$i] + $weekday->weekday, 7);
+                    }
+
+                    if ($rangeStart <= $i && $i <= $rangeEnd) {
+                        $wDayMaskRel[] = $i;
+                    }
+                }
+            }
+        }
+
+        return array($byWeekDayRel, $wDayMaskRel);
     }
 
     /**
