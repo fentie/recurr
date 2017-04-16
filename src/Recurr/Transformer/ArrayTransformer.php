@@ -301,10 +301,10 @@ class ArrayTransformer
 
                 foreach ($bySetPos as $setPos) {
                     if ($setPos < 0) {
-                        $dayPos  = floor($setPos / count($timeSet));
+                        $dayPos  = (int) floor($setPos / count($timeSet));
                         $timePos = DateUtil::pymod($setPos, count($timeSet));
                     } else {
-                        $dayPos  = floor(($setPos - 1) / count($timeSet));
+                        $dayPos  = (int) floor(($setPos - 1) / count($timeSet));
                         $timePos = DateUtil::pymod(($setPos - 1), count($timeSet));
                     }
 
