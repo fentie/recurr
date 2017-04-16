@@ -142,28 +142,27 @@ class DateUtil
      * @param DateInfo  $dtInfo
      *
      * @return DaySet
+     * @throws \DomainException on invalid frequency
      */
     public static function getDaySet(Rule $rule, \DateTime $dt, DateInfo $dtInfo)
     {
         switch ($rule->getFreq()) {
             case Frequency::SECONDLY:
                 return self::getDaySetOfDay($dt);
-                break;
             case Frequency::MINUTELY:
                 return self::getDaySetOfDay($dt);
-                break;
             case Frequency::HOURLY:
                 return self::getDaySetOfDay($dt);
-                break;
             case Frequency::DAILY:
                 return self::getDaySetOfDay($dt);
-                break;
             case Frequency::WEEKLY:
                 return self::getDaySetOfWeek($dt, $rule, $dtInfo);
             case Frequency::MONTHLY:
                 return self::getDaySetOfMonth($dt);
             case Frequency::YEARLY:
                 return self::getDaySetOfYear($dt);
+            default:
+                throw new \DomainException();
         }
     }
 
