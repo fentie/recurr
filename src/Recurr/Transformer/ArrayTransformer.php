@@ -244,22 +244,8 @@ class ArrayTransformer
 
                 $ifByYearDay = $this->byYearDayRuleApplies($byYearDay, $dayOfYear, $dtInfo);
 
-                $ifByMonthDay = $byMonthDay !== null && !in_array(
-                        $dtInfo->mDayMask[$dayOfYear],
-                        $byMonthDay
-                    );
-
-                // Handle "last day of next month" problem.
-                if ($fixLastDayOfMonth
-                        && $ifByMonthDay
-                        && $implicitByMonthDay
-                        && $startMonthLength > $dtInfo->monthLength
-                        && $dayOfMonth == $dtInfo->monthLength
-                        && $dayOfMonth < $startMonthLength
-                        && !$numMatched
-                ) {
-                    $ifByMonthDay = false;
-                }
+                $ifByMonthDay = $this->byMonthDayRuleApplies($byMonthDay, $dtInfo, $dayOfYear, $fixLastDayOfMonth,
+                    $implicitByMonthDay, $startMonthLength, $dayOfMonth, $numMatched);
 
                 $ifByMonthDayNeg = $byMonthDayNeg !== null && !in_array(
                         $dtInfo->mDayMaskNeg[$dayOfYear],
@@ -751,6 +737,45 @@ class ArrayTransformer
         }
 
         return DateUtil::getTimeSet($rule, $dt);
+    }
+
+    /**
+     * @param $byMonthDay
+     * @param $dtInfo
+     * @param $dayOfYear
+     * @param $fixLastDayOfMonth
+     * @param $implicitByMonthDay
+     * @param $startMonthLength
+     * @param $dayOfMonth
+     * @param $numMatched
+     *
+     * @return bool
+     */
+    private function byMonthDayRuleApplies(
+        $byMonthDay,
+        $dtInfo,
+        $dayOfYear,
+        $fixLastDayOfMonth,
+        $implicitByMonthDay,
+        $startMonthLength,
+        $dayOfMonth,
+        $numMatched
+    ) {
+        $ifByMonthDay = $byMonthDay !== null && !in_array($dtInfo->mDayMask[$dayOfYear], $byMonthDay);
+
+        // Handle "last day of next month" problem.
+        if ($fixLastDayOfMonth
+            && $ifByMonthDay
+            && $implicitByMonthDay
+            && $startMonthLength > $dtInfo->monthLength
+            && $dayOfMonth == $dtInfo->monthLength
+            && $dayOfMonth < $startMonthLength
+            && !$numMatched
+        ) {
+            return false;
+        }
+
+        return $ifByMonthDay;
     }
 
     /**
