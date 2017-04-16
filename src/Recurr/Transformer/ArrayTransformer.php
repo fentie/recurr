@@ -222,53 +222,32 @@ class ArrayTransformer
             $wDayMaskRel = array();
             $timeSet = $this->buildTimeSet($rule, $freq, $byHour, $hour, $byMinute, $minute, $bySecond, $second, $dt);
 
-            // Handle byWeekNum
-            $wNoMask = $this->calculateWeekNumberMask($byWeekNum, $dtInfo, $weekStart, $year);
-
             // Handle relative weekdays (e.g. 3rd Friday of month)
-            list($byWeekDayRel, $wDayMaskRel) = $this->handleRelativeWeekdays($byWeekDayRel, $freq, $byMonth, $dtInfo, $month, $wDayMaskRel);
+            list($byWeekDayRel, $wDayMaskRel) = $this->handleRelativeWeekdays(
+                $byWeekDayRel,
+                $freq,
+                $byMonth,
+                $dtInfo,
+                $month,
+                $wDayMaskRel
+            );
 
-            $numMatched = 0;
-            foreach ($daySet as $i => $dayOfYear) {
-                $dayOfMonth = $dtInfo->mDayMask[$dayOfYear];
-
-                $ifByMonth = $byMonth !== null && !in_array(
-                        $dtInfo->mMask[$dayOfYear],
-                        $byMonth
-                    );
-
-                $ifByWeekNum = $byWeekNum !== null && !in_array(
-                        $i,
-                        $wNoMask
-                    );
-
-                $ifByYearDay = $this->byYearDayRuleApplies($byYearDay, $dayOfYear, $dtInfo);
-
-                $ifByMonthDay = $this->byMonthDayRuleApplies($byMonthDay, $dtInfo, $dayOfYear, $fixLastDayOfMonth,
-                    $implicitByMonthDay, $startMonthLength, $dayOfMonth, $numMatched);
-
-                $ifByMonthDayNeg = $byMonthDayNeg !== null && !in_array(
-                        $dtInfo->mDayMaskNeg[$dayOfYear],
-                        $byMonthDayNeg
-                    );
-
-                $ifByDay = $byWeekDay !== null && count($byWeekDay) && !in_array(
-                        $dtInfo->wDayMask[$dayOfYear],
-                        $byWeekDay
-                    );
-
-                $ifWDayMaskRel = $byWeekDayRel !== null && !in_array($dayOfYear, $wDayMaskRel);
-
-                if ($byMonthDay !== null && $byMonthDayNeg !== null) {
-                    if ($ifByMonthDay && $ifByMonthDayNeg) {
-                        unset($daySet[$i]);
-                    }
-                } elseif ($ifByMonth || $ifByWeekNum || $ifByYearDay || $ifByMonthDay || $ifByMonthDayNeg || $ifByDay || $ifWDayMaskRel) {
-                    unset($daySet[$i]);
-                } else {
-                    ++$numMatched;
-                }
-            }
+            $daySet = $this->applyRulesToDaySet(
+                $daySet,
+                $dtInfo,
+                $byMonth,
+                $byWeekNum,
+                $this->calculateWeekNumberMask($byWeekNum, $dtInfo, $weekStart, $year),
+                $byYearDay,
+                $byMonthDay,
+                $fixLastDayOfMonth,
+                $implicitByMonthDay,
+                $startMonthLength,
+                $byMonthDayNeg,
+                $byWeekDay,
+                $byWeekDayRel,
+                $wDayMaskRel
+            );
 
             if (!empty($bySetPos) && !empty($daySet)) {
                 $datesAdj  = array();
@@ -800,5 +779,72 @@ class ArrayTransformer
                 !in_array($dayOfYear + 1 - $dtInfo->yearLength, $byYearDay) &&
                 !in_array(-$dtInfo->nextYearLength + $dayOfYear - $dtInfo->yearLength, $byYearDay)
             );
+    }
+
+    /**
+     * @param int[] $daySet
+     * @param DateInfo $dtInfo
+     * @param int[] $byMonth
+     * @param int[] $byWeekNum
+     * @param $wNoMask
+     * @param int[] $byYearDay
+     * @param int[] $byMonthDay
+     * @param bool $fixLastDayOfMonth
+     * @param bool $implicitByMonthDay
+     * @param $startMonthLength
+     * @param $byMonthDayNeg
+     * @param int[] $byWeekDay
+     * @param int[] $byWeekDayRel
+     * @param $wDayMaskRel
+     *
+     * @return int[]
+     */
+    private function applyRulesToDaySet(
+        $daySet,
+        $dtInfo,
+        $byMonth,
+        $byWeekNum,
+        $wNoMask,
+        $byYearDay,
+        $byMonthDay,
+        $fixLastDayOfMonth,
+        $implicitByMonthDay,
+        $startMonthLength,
+        $byMonthDayNeg,
+        $byWeekDay,
+        $byWeekDayRel,
+        $wDayMaskRel
+    ) {
+        $numMatched = 0;
+        foreach ($daySet as $i => $dayOfYear) {
+            $dayOfMonth = $dtInfo->mDayMask[$dayOfYear];
+
+            $ifByMonth = $byMonth !== null && !in_array($dtInfo->mMask[$dayOfYear], $byMonth);
+
+            $ifByWeekNum = $byWeekNum !== null && !in_array($i, $wNoMask);
+
+            $ifByYearDay = $this->byYearDayRuleApplies($byYearDay, $i, $dtInfo);
+
+            $ifByMonthDay = $this->byMonthDayRuleApplies($byMonthDay, $dtInfo, $dayOfYear, $fixLastDayOfMonth,
+                $implicitByMonthDay, $startMonthLength, $dayOfMonth, $numMatched);
+
+            $ifByMonthDayNeg = $byMonthDayNeg !== null && !in_array($dtInfo->mDayMaskNeg[$dayOfYear], $byMonthDayNeg);
+
+            $ifByDay = $byWeekDay !== null && count($byWeekDay) && !in_array($dtInfo->wDayMask[$dayOfYear], $byWeekDay);
+
+            $ifWDayMaskRel = $byWeekDayRel !== null && !in_array($dayOfYear, $wDayMaskRel);
+
+            if ($byMonthDay !== null && $byMonthDayNeg !== null) {
+                if ($ifByMonthDay && $ifByMonthDayNeg) {
+                    unset($daySet[$i]);
+                }
+            } elseif ($ifByMonth || $ifByWeekNum || $ifByYearDay || $ifByMonthDay || $ifByMonthDayNeg || $ifByDay || $ifWDayMaskRel) {
+                unset($daySet[$i]);
+            } else {
+                ++$numMatched;
+            }
+        }
+
+        return $daySet;
     }
 }
