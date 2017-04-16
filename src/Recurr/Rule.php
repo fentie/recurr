@@ -920,7 +920,7 @@ class Rule
     /**
      * Get an array of Weekdays
      *
-     * @return array of Weekdays
+     * @return Weekday[]
      * @throws InvalidWeekday
      */
     public function getByDayTransformedToWeekdays()

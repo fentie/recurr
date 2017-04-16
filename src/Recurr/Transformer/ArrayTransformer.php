@@ -172,8 +172,6 @@ class ArrayTransformer
 
         if (!empty($byWeekDay)) {
             foreach ($byWeekDay as $idx => $day) {
-                /** @var $day Weekday */
-
                 if (!empty($day->num)) {
                     $byWeekDayRel[] = $day;
                     unset($byWeekDay[$idx]);
