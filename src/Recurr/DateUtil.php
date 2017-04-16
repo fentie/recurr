@@ -481,16 +481,16 @@ class DateUtil
      */
     public static function isLeapYear($year)
     {
-        $isDivisBy4   = $year % 4 == 0 ? true : false;
-        $isDivisBy100 = $year % 100 == 0? true : false;
-        $isDivisBy400 = $year % 400 == 0 ? true : false;
+        $divisibleBy4   = $year % 4 === 0;
+        $divisibleBy100 = $year % 100 === 0;
+        $divisibleBy400 = $year % 400 === 0;
 
         // http://en.wikipedia.org/wiki/February_29
-        if ($isDivisBy100 && !$isDivisBy400) {
+        if ($divisibleBy100 && !$divisibleBy400) {
             return false;
         }
 
-        return $isDivisBy4;
+        return $divisibleBy4;
     }
 
     /**
