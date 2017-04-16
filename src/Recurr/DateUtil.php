@@ -514,11 +514,7 @@ class DateUtil
      */
     public static function getDayOfWeekAsText(\DateTime $dt)
     {
-        $dayOfWeek = $dt->format('w') - 1;
-
-        if ($dayOfWeek < 0) {
-            $dayOfWeek = 6;
-        }
+        $dayOfWeek = self::getDayOfWeek($dt);
 
         $map = array('MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU');
 
