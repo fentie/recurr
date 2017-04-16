@@ -220,32 +220,7 @@ class ArrayTransformer
             $daySetEnd   = $tmp->end;
             $wNoMask     = array();
             $wDayMaskRel = array();
-            $timeSet     = DateUtil::getTimeSet($rule, $dt);
-
-            if ($freq >= Frequency::HOURLY) {
-                if (($freq >= Frequency::HOURLY && !empty($byHour) && !in_array(
-                            $hour,
-                            $byHour
-                        )) || ($freq >= Frequency::MINUTELY && !empty($byMinute) && !in_array(
-                            $minute,
-                            $byMinute
-                        )) || ($freq >= Frequency::SECONDLY && !empty($bySecond) && !in_array($second, $bySecond))
-                ) {
-                    $timeSet = array();
-                } else {
-                    switch ($freq) {
-                        case Frequency::HOURLY:
-                            $timeSet = DateUtil::getTimeSetOfHour($rule, $dt);
-                            break;
-                        case Frequency::MINUTELY:
-                            $timeSet = DateUtil::getTimeSetOfMinute($rule, $dt);
-                            break;
-                        case Frequency::SECONDLY:
-                            $timeSet = DateUtil::getTimeSetOfSecond($dt);
-                            break;
-                    }
-                }
-            }
+            $timeSet = $this->buildTimeSet($rule, $freq, $byHour, $hour, $byMinute, $minute, $bySecond, $second, $dt);
 
             // Handle byWeekNum
             if (!empty($byWeekNum)) {
@@ -737,5 +712,41 @@ class ArrayTransformer
         }
 
         return array_values($recurrences);
+    }
+
+    /**
+     * @param Rule $rule
+     * @param $freq
+     * @param int[] $byHour
+     * @param int $hour
+     * @param int[] $byMinute
+     * @param int $minute
+     * @param int[] $bySecond
+     * @param int $second
+     * @param \DateTime $dt
+     *
+     * @return Time[]
+     */
+    private function buildTimeSet(Rule $rule, $freq, $byHour, $hour, $byMinute, $minute, $bySecond, $second, \DateTime $dt)
+    {
+        if ($freq >= Frequency::HOURLY) {
+            if (($freq >= Frequency::HOURLY && !empty($byHour) && !in_array($hour, $byHour, true)) ||
+                ($freq >= Frequency::MINUTELY && !empty($byMinute) && !in_array($minute, $byMinute, true)) ||
+                ($freq >= Frequency::SECONDLY && !empty($bySecond) && !in_array($second, $bySecond, true))
+            ) {
+                return array();
+            }
+
+            switch ($freq) {
+                case Frequency::HOURLY:
+                    return DateUtil::getTimeSetOfHour($rule, $dt);
+                case Frequency::MINUTELY:
+                    return DateUtil::getTimeSetOfMinute($rule, $dt);
+                case Frequency::SECONDLY:
+                    return DateUtil::getTimeSetOfSecond($dt);
+            }
+        }
+
+        return DateUtil::getTimeSet($rule, $dt);
     }
 }
