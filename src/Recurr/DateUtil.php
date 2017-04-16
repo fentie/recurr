@@ -152,23 +152,23 @@ class DateUtil
     {
         switch ($rule->getFreq()) {
             case Frequency::SECONDLY:
-                return self::getDaySetOfDay($dt, $start, $rule, $dtInfo);
+                return self::getDaySetOfDay($dt);
                 break;
             case Frequency::MINUTELY:
-                return self::getDaySetOfDay($dt, $start, $rule, $dtInfo);
+                return self::getDaySetOfDay($dt);
                 break;
             case Frequency::HOURLY:
-                return self::getDaySetOfDay($dt, $start, $rule, $dtInfo);
+                return self::getDaySetOfDay($dt);
                 break;
             case Frequency::DAILY:
-                return self::getDaySetOfDay($dt, $start, $rule, $dtInfo);
+                return self::getDaySetOfDay($dt);
                 break;
             case Frequency::WEEKLY:
                 return self::getDaySetOfWeek($dt, $start, $rule, $dtInfo);
             case Frequency::MONTHLY:
-                return self::getDaySetOfMonth($dt, $start, $rule, $dtInfo);
+                return self::getDaySetOfMonth($dt);
             case Frequency::YEARLY:
-                return self::getDaySetOfYear($dt, $start, $rule, $dtInfo);
+                return self::getDaySetOfYear($dt);
         }
     }
 
