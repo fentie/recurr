@@ -73,7 +73,7 @@ class DateUtil
         $i              = new DateInfo();
         $i->dt          = $dt;
         $i->dayOfWeek   = self::getDayOfWeek($dt);
-        $i->monthLength = $dt->format('t');
+        $i->monthLength = (int) $dt->format('t');
         $i->yearLength  = self::getYearLength($dt);
 
         $i->mMask       = self::getMonthMask($dt);
