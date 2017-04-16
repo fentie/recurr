@@ -117,8 +117,7 @@ class DateUtil
         \DateTime $dt,
         Rule $rule = null,
         DateInfo $dtInfo = null
-    )
-    {
+    ) {
         $start = clone $dt;
         $start->setDate($start->format('Y'), 1, 1);
 
