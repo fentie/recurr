@@ -215,7 +215,7 @@ class ArrayTransformer
         while ($continue) {
             $dtInfo = DateUtil::getDateInfo($dt);
 
-            $tmp         = DateUtil::getDaySet($rule, $dt, $dtInfo, $start);
+            $tmp         = DateUtil::getDaySet($rule, $dt, $dtInfo);
             $daySet      = $tmp->set;
             $daySetStart = $tmp->start;
             $daySetEnd   = $tmp->end;

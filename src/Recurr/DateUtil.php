@@ -106,7 +106,6 @@ class DateUtil
      * Get an array of DOY (Day of Year) for each day in a particular week.
      *
      * @param \DateTime     $dt
-     * @param \DateTime     $start
      * @param null|Rule     $rule
      * @param null|DateInfo $dtInfo
      *
@@ -114,7 +113,6 @@ class DateUtil
      */
     public static function getDaySetOfWeek(
         \DateTime $dt,
-        \DateTime $start,
         Rule $rule = null,
         DateInfo $dtInfo = null
     )
@@ -144,11 +142,10 @@ class DateUtil
      * @param Rule      $rule
      * @param \DateTime $dt
      * @param DateInfo  $dtInfo
-     * @param \DateTime $start
      *
      * @return DaySet
      */
-    public static function getDaySet(Rule $rule, \DateTime $dt, DateInfo $dtInfo, $start)
+    public static function getDaySet(Rule $rule, \DateTime $dt, DateInfo $dtInfo)
     {
         switch ($rule->getFreq()) {
             case Frequency::SECONDLY:
@@ -164,7 +161,7 @@ class DateUtil
                 return self::getDaySetOfDay($dt);
                 break;
             case Frequency::WEEKLY:
-                return self::getDaySetOfWeek($dt, $start, $rule, $dtInfo);
+                return self::getDaySetOfWeek($dt, $rule, $dtInfo);
             case Frequency::MONTHLY:
                 return self::getDaySetOfMonth($dt);
             case Frequency::YEARLY:
