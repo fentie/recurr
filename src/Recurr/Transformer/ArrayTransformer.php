@@ -424,7 +424,7 @@ class ArrayTransformer
                         $mod   = DateUtil::pymod($month, 12);
                         $month = $mod;
                         $year += $delta;
-                        if ($month == 0) {
+                        if ($month === 0) {
                             $month = 12;
                             --$year;
                         }

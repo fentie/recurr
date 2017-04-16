@@ -129,7 +129,7 @@ class DateUtil
             $set[] = $i;
             ++$i;
 
-            if (null !== $dtInfo && null !== $rule && $dtInfo->wDayMask[$i] == $rule->getWeekStartAsNum()) {
+            if (null !== $dtInfo && null !== $rule && $dtInfo->wDayMask[$i] === $rule->getWeekStartAsNum()) {
                 break;
             }
         }
@@ -430,7 +430,8 @@ class DateUtil
     public static function hasLeapYearBug()
     {
         $leapBugTest = \DateTime::createFromFormat('Y-m-d', '2016-03-21');
-        return $leapBugTest->format('z') != '80';
+
+        return $leapBugTest->format('z') !== '80';
     }
 
     /**
